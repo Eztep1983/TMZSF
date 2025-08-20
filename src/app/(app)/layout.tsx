@@ -90,7 +90,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-border bg-card pt-5">
             <div className="flex flex-shrink-0 items-center px-4">
               <Wrench className="h-8 w-auto text-primary" />
-              <span className="ml-2 text-xl font-semibold font-headline">TechFlow</span>
+              <span className="ml-2 text-xl font-semibold font-headline">TecniControl</span>
             </div>
             <div className="mt-5 flex flex-1 flex-col justify-between">
               <NavLinks />
@@ -114,7 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-1 justify-between px-4">
             <div className="flex flex-1 items-center">
               <Wrench className="h-8 w-auto text-primary" />
-              <span className="ml-2 text-xl font-semibold font-headline">TechFlow</span>
+              <span className="ml-2 text-xl font-semibold font-headline">TecniControl</span>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
                 <UserProfile />
@@ -149,7 +149,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex flex-shrink-0 items-center px-4">
                  <Wrench className="h-8 w-auto text-primary" />
-                 <span className="ml-2 text-xl font-semibold font-headline">TechFlow</span>
+                 <span className="ml-2 text-xl font-semibold font-headline">TecniControl</span>
               </div>
               <div className="mt-5 h-0 flex-1 overflow-y-auto justify-between flex flex-col">
                 <NavLinks onClick={() => setSidebarOpen(false)}/>

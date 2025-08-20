@@ -20,12 +20,43 @@ import {
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { Cliente } from "@/types";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from 'next/navigation';
 
 interface ClientesDataTableProps {
   data: Cliente[];
 }
 
 export function ClientesDataTable({ data }: ClientesDataTableProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+
+const handleDelete = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "clientes", id));
+    
+    toast({
+      title: "✅ Cliente eliminado",
+      description: "El cliente ha sido eliminado correctamente.",
+      variant: "success", 
+    });
+
+    router.push("/clientes");
+    router.refresh();
+
+  } catch (error) {
+    console.error("Error al eliminar cliente:", error);
+    toast({
+      title: "❌ Error",
+      description: "No se pudo eliminar el cliente. " + 
+                  (error instanceof Error ? error.message : ""),
+      variant: "destructive",
+    });
+  }
+};
+
   return (
     <div className="rounded-md border bg-card">
       <Table>
@@ -34,6 +65,7 @@ export function ClientesDataTable({ data }: ClientesDataTableProps) {
             <TableHead>Nombre</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Teléfono</TableHead>
+            <TableHead>Dirección</TableHead>
             <TableHead>
               <span className="sr-only">Acciones</span>
             </TableHead>
@@ -46,6 +78,7 @@ export function ClientesDataTable({ data }: ClientesDataTableProps) {
                 <TableCell className="font-medium">{client.name}</TableCell>
                 <TableCell>{client.email}</TableCell>
                 <TableCell>{client.phone}</TableCell>
+                <TableCell>{client.address || "-"}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -57,12 +90,15 @@ export function ClientesDataTable({ data }: ClientesDataTableProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
-                        <Link href={`/clientes/${client.id}`}>
-                           <Edit className="mr-2 h-4 w-4" />
-                           Editar
+                        <Link href={`/clientes/${client.id}/editar`}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => handleDelete(client.id!)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
                       </DropdownMenuItem>
@@ -73,8 +109,8 @@ export function ClientesDataTable({ data }: ClientesDataTableProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center">
-                Sin clientes.
+              <TableCell colSpan={5} className="h-24 text-center">
+                No hay clientes registrados.
               </TableCell>
             </TableRow>
           )}

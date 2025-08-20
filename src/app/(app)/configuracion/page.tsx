@@ -16,7 +16,7 @@ export default function ConfiguracionPage() {
         <CardContent className="space-y-4">
             <div className="space-y-2">
                 <label htmlFor="business-name">Nombre del Negocio</label>
-                <Input id="business-name" defaultValue="TechFlow" />
+                <Input id="business-name" defaultValue="TecniControl" />
             </div>
             <div className="space-y-2">
                 <label htmlFor="business-phone">Teléfono</label>

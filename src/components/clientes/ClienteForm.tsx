@@ -18,6 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { Cliente } from "@/types";
+import { useState } from "react";
+// Importaciones de Firebase
+import { db } from "@/lib/firebase";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
@@ -36,6 +40,7 @@ interface ClienteFormProps {
 export function ClienteForm({ initialData }: ClienteFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const defaultValues = initialData ? initialData : {
     name: "",
@@ -50,13 +55,46 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
     defaultValues,
   });
 
-  const onSubmit = (data: ClienteFormValues) => {
-    toast({
-      title: initialData ? "Cliente Actualizado" : "Cliente Creado",
-      description: `El cliente ${data.name} ha sido guardado.`,
-    });
-    router.push("/clientes");
-    router.refresh();
+  const onSubmit = async (data: ClienteFormValues) => {
+    setIsLoading(true);
+    try {
+      if (initialData && initialData.id) {
+        // Actualizar cliente existente
+        const clienteRef = doc(db, "clientes", initialData.id);
+        await updateDoc(clienteRef, {
+          ...data,
+          updatedAt: new Date().toISOString(),
+        });
+        toast({
+          title: "Cliente Actualizado",
+          description: `El cliente ${data.name} ha sido actualizado correctamente.`,
+          variant: "default",
+        });
+      } else {
+        // Crear nuevo cliente con ID automático
+        await addDoc(collection(db, "clientes"), {
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        toast({
+          title: "Cliente Creado",
+          description: `El cliente ${data.name} ha sido creado correctamente.`,
+          variant: "default",
+        });
+      }
+      router.push("/clientes");
+      router.refresh();
+    } catch (error) {
+      console.error("Error al guardar el cliente:", error);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al guardar el cliente. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -137,8 +175,8 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
           </CardContent>
         </Card>
         <div className="flex justify-end">
-          <Button type="submit">
-            {initialData ? "Guardar Cambios" : "Crear Cliente"}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Guardando..." : initialData ? "Guardar Cambios" : "Crear Cliente"}
           </Button>
         </div>
       </form>

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "TechFlow - Gestión de Servicios",
+  title: "TecniControl - Gestión de Servicios",
   description: "Gestiona tus órdenes de servicio con facilidad.",
 };
 

@@ -1,22 +1,50 @@
 import { ClienteForm } from "@/components/clientes/ClienteForm";
-import { mockClients } from "@/lib/data";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 async function getCliente(id: string) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockClients.find((client) => client.id === id) || null;
+  const docRef = doc(db, "clientes", id);
+  const docSnap = await getDoc(docRef);
+  
+  if (!docSnap.exists()) {
+    return null;
+  }
+
+  return {
+    id: docSnap.id,
+    ...docSnap.data()
+  } as Cliente;
 }
 
-export default async function EditarClientePage({ params }: { params: { id: string } }) {
+export default async function ClienteDetailPage({ 
+  params 
+}: { 
+  params: { id: string } 
+}) {
   const client = await getCliente(params.id);
 
   if (!client) {
-    return <div>Cliente no encontrado.</div>;
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold">Cliente no encontrado</h2>
+        <Button asChild className="mt-4">
+          <Link href="/clientes">Volver al listado</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold font-headline">Editar Cliente: {client.name}</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Editar Cliente: {client.name}</h1>
+        <Button asChild variant="outline">
+          <Link href={`/clientes/${params.id}`}>Modo Visualización</Link>
+        </Button>
+      </div>
+      
       <ClienteForm initialData={client} />
     </div>
   );

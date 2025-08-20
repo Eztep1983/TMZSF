@@ -41,6 +41,7 @@ import {
   DialogFooter,
   DialogClose
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   clientId: z.string().min(1, { message: "El cliente es requerido." }),
@@ -90,8 +91,7 @@ export function OrderForm({ initialData }: OrderFormProps) {
         deviceType: initialData.deviceType,
         problemDescription: initialData.problemDescription,
         status: initialData.status,
-        parts: initialData.parts.map(p => ({name: p.name, quantity: p.quantity, price: p.price})),
-        estimatedBudget: initialData.estimatedBudget
+        parts: initialData.parts.map(p => ({name: p.name, quantity: p.quantity})),
       }
     : {
         clientId: "",
@@ -99,7 +99,6 @@ export function OrderForm({ initialData }: OrderFormProps) {
         problemDescription: "",
         status: "Recibido" as const,
         parts: [],
-        estimatedBudget: 0,
       };
 
   const form = useForm<OrderFormValues>({
@@ -284,19 +283,6 @@ export function OrderForm({ initialData }: OrderFormProps) {
                     </FormItem>
                 )}
                 />
-                 <FormField
-                    control={form.control}
-                    name="estimatedBudget"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Presupuesto Estimado ($)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" {...field} placeholder="0.00" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
             </div>
           </CardContent>
         </Card>
@@ -345,9 +331,6 @@ export function OrderForm({ initialData }: OrderFormProps) {
                     name={`parts.${index}.price`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={cn(index !== 0 && "sr-only")}>
-                          Precio ($)
-                        </FormLabel>
                         <FormControl>
                           <Input type="number" step="0.01" {...field} />
                         </FormControl>

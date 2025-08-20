@@ -42,7 +42,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-2">
                 <Wrench className="h-8 w-8 text-primary" />
-                <CardTitle className="text-4xl font-headline">TechFlow</CardTitle>
+                <CardTitle className="text-4xl font-headline">TecniControl</CardTitle>
             </div>
           <CardDescription>Inicia sesión para gestionar tus órdenes de servicio</CardDescription>
         </CardHeader>
