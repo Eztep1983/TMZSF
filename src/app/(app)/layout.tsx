@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/components/auth/UserProfile';
 
 const navigation = [
-  { name: 'Panel de Control', href: '/', icon: LayoutDashboard },
   { name: 'Órdenes de Servicio', href: '/ordenes', icon: Wrench },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Inventario', href: '/inventario', icon: Package },

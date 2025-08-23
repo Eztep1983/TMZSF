@@ -29,7 +29,7 @@ const formSchema = z.object({
   phone: z.string().min(8, { message: "El número de teléfono parece muy corto." }),
   address: z.string().optional(),
   observations: z.string().optional(),
-});
+  equipo: z.string().optional(),});
 
 type ClienteFormValues = z.infer<typeof formSchema>;
 
@@ -48,6 +48,7 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
     phone: "",
     address: "",
     observations: "",
+    equipo: "",
   };
 
   const form = useForm<ClienteFormValues>({
@@ -112,7 +113,7 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
                 <FormItem>
                   <FormLabel>Nombre Completo</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="Nombre" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +127,7 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="john.doe@example.com" {...field} />
+                      <Input type="email" placeholder="email@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,7 +140,7 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
                   <FormItem>
                     <FormLabel>Teléfono</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="(123) 456-7890" {...field} />
+                      <Input type="tel" placeholder="(57) 123456789 " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -153,7 +154,7 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
                 <FormItem>
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Input placeholder="Calle Falsa 123, Springfield" {...field} />
+                    <Input placeholder="Escriba la direccion de su cliente" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -167,6 +168,19 @@ export function ClienteForm({ initialData }: ClienteFormProps) {
                   <FormLabel>Observaciones</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Cliente referido por..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          <FormField
+              control={form.control}
+              name="equipo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Añadir dispositivo del cliente</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Escriba el dispositivo del cliente si tiene..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

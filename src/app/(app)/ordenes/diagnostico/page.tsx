@@ -49,10 +49,7 @@ export default function OrdenesDiagnosticoPage() {
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800'
-      case 'en_proceso': return 'bg-orange-100 text-orange-800'
-      case 'completada': return 'bg-green-100 text-green-800'
-      case 'cancelada': return 'bg-red-100 text-red-800'
+      case 'pendiene': return 'bg-yellow-100 text-yellow-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -94,60 +91,6 @@ export default function OrdenesDiagnosticoPage() {
               <Plus className="w-5 h-5" />
               <span>Nueva Orden</span>
             </button>
-          </div>
-        </div>
-
-        {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-2 rounded-lg">
-                <SearchIcon className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Pendientes</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {ordenes.filter(o => o.estado === 'pendiente').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-orange-100 p-2 rounded-lg">
-                <SearchIcon className="w-6 h-6 text-orange-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">En Proceso</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {ordenes.filter(o => o.estado === 'en_proceso').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <SearchIcon className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Completados</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {ordenes.filter(o => o.estado === 'completada').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <SearchIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-blue-600">{ordenes.length}</p>
-              </div>
-            </div>
           </div>
         </div>
 

@@ -13,10 +13,13 @@ interface FormularioGarantiaProps {
 export default function FormularioGarantia({ onClose, onSuccess }: FormularioGarantiaProps) {
   const [loading, setLoading] = useState(false)
   const [cliente, setCliente] = useState<Cliente>({
-    nombre: '',
-    telefono: '',
-    email: '',
-    direccion: ''
+    id: '',
+    nombre: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    observations: "",
+    equipo: "",
   })
   
   const [dispositivo, setDispositivo] = useState<Dispositivo>({

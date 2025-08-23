@@ -1,9 +1,12 @@
 // types/orden.ts
 export interface Cliente {
+  id: string;
   nombre: string;
-  telefono: string;
   email: string;
-  direccion: string;
+  telefono: string;
+  direccion?: string;
+  observations?: string;
+  equipo?: string; 
 }
 
 export interface Dispositivo {

@@ -14,10 +14,13 @@ interface FormularioDiagnosticoProps {
 export default function FormularioDiagnostico({ onClose, onSuccess }: FormularioDiagnosticoProps) {
   const [loading, setLoading] = useState(false)
   const [cliente, setCliente] = useState<Cliente>({
+    id: '',
     nombre: '',
     telefono: '',
     email: '',
-    direccion: ''
+    direccion: '',
+    observations: '',
+    equipo: ''
   })
   
   const [dispositivo, setDispositivo] = useState<Dispositivo>({
@@ -79,7 +82,7 @@ export default function FormularioDiagnostico({ onClose, onSuccess }: Formulario
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Datos del Cliente */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Datos del Cliente</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Seleccione el Cliente</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

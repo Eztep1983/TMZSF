@@ -40,10 +40,10 @@ const handleDelete = async (id: string) => {
     toast({
       title: "✅ Cliente eliminado",
       description: "El cliente ha sido eliminado correctamente.",
-      variant: "success", 
+      variant: "default", 
     });
 
-    router.push("/clientes");
+    router.push("/");
     router.refresh();
 
   } catch (error) {
