@@ -47,13 +47,6 @@ export default function OrdenesDiagnosticoPage() {
     orden.observacionesIniciales.toLowerCase().includes(busqueda.toLowerCase())
   )
 
-  const getEstadoColor = (estado: string) => {
-    switch (estado) {
-      case 'pendiene': return 'bg-yellow-100 text-yellow-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   if (mostrarFormulario) {
     return (
       <FormularioDiagnostico
@@ -139,9 +132,6 @@ export default function OrdenesDiagnosticoPage() {
                       Contador
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -169,11 +159,6 @@ export default function OrdenesDiagnosticoPage() {
                         <div className="text-sm text-gray-900">
                           {orden.contadorMaquina ? orden.contadorMaquina.toLocaleString() : 'N/A'}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(orden.estado)}`}>
-                          {orden.estado.replace('_', ' ')}
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {orden.fechaCreacion?.toLocaleDateString()}
@@ -239,12 +224,6 @@ export default function OrdenesDiagnosticoPage() {
                 </div>
                 
                 <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Estado</h4>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(ordenSeleccionada.estado)}`}>
-                      {ordenSeleccionada.estado.replace('_', ' ')}
-                    </span>
-                  </div>
                   
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Fechas</h4>

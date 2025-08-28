@@ -46,16 +46,6 @@ export default function OrdenesEntregaPage() {
     orden.dispositivo.numeroSerie.toLowerCase().includes(busqueda.toLowerCase())
   )
 
-  const getEstadoColor = (estado: string) => {
-    switch (estado) {
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800'
-      case 'en_proceso': return 'bg-purple-100 text-purple-800'
-      case 'completada': return 'bg-green-100 text-green-800'
-      case 'cancelada': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   if (mostrarFormulario) {
     return (
       <FormularioEntrega
@@ -82,7 +72,7 @@ export default function OrdenesEntregaPage() {
                 <Truck className="w-8 h-8 text-purple-600" />
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">Órdenes de Entrega</h1>
-                  <p className="text-gray-600">Entrega de equipos reparados al cliente</p>
+                  <p className="text-gray-600">Entrega de equipos reparados o instalados al cliente</p>
                 </div>
               </div>
             </div>
@@ -93,60 +83,6 @@ export default function OrdenesEntregaPage() {
               <Plus className="w-5 h-5" />
               <span>Nueva Entrega</span>
             </button>
-          </div>
-        </div>
-
-        {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-2 rounded-lg">
-                <Truck className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Pendientes</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {ordenes.filter(o => o.estado === 'pendiente').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-purple-100 p-2 rounded-lg">
-                <Truck className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">En Proceso</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {ordenes.filter(o => o.estado === 'en_proceso').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Entregados</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {ordenes.filter(o => o.estado === 'completada').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <Truck className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-blue-600">{ordenes.length}</p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -211,9 +147,6 @@ export default function OrdenesEntregaPage() {
                       Validación Cliente
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -241,11 +174,6 @@ export default function OrdenesEntregaPage() {
                         ) : (
                           <span className="text-sm text-yellow-600">Pendiente</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(orden.estado)}`}>
-                          {orden.estado.replace('_', ' ')}
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
@@ -305,12 +233,6 @@ export default function OrdenesEntregaPage() {
                 </div>
                 
                 <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Estado</h4>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(ordenSeleccionada.estado)}`}>
-                      {ordenSeleccionada.estado.replace('_', ' ')}
-                    </span>
-                  </div>
                   
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Fechas</h4>

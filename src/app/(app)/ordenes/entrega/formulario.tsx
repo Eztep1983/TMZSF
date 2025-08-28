@@ -14,10 +14,13 @@ interface FormularioEntregaProps {
 export default function FormularioEntrega({ onClose, onSuccess }: FormularioEntregaProps) {
   const [loading, setLoading] = useState(false)
   const [cliente, setCliente] = useState<Cliente>({
-    nombre: '',
-    telefono: '',
-    email: '',
-    direccion: ''
+    id: '',
+    nombre: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    observations: "",
+    equipo: "",
   })
   
   const [dispositivo, setDispositivo] = useState<Dispositivo>({
@@ -45,7 +48,6 @@ export default function FormularioEntrega({ onClose, onSuccess }: FormularioEntr
         observacionesFinales,
         firmaCliente,
         validacionCliente,
-        estado: validacionCliente ? 'completada' : 'pendiente'
       }
 
       await addDoc(collection(db, 'ordenes'), nuevaOrden)

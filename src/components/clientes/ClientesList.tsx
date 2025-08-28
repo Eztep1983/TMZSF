@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
-import { Cliente } from "@/types";
+import { Cliente } from "@/types/orden";
 
 export function ClientesList() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -25,6 +25,7 @@ export function ClientesList() {
           phone: doc.data().phone || "",
           address: doc.data().address || "",
           observations: doc.data().observations || "",
+          dispositivos: doc.data().dispositivos || [],
         }));
         
         setClientes(clientesData);

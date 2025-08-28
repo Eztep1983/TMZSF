@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
-import type { Cliente } from "@/types";
+import type { Cliente } from "@/types/orden";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +57,10 @@ const handleDelete = async (id: string) => {
   }
 };
 
+const handleView = (id: string) => {
+  router.push(`/clientes/${id}`);
+}; 
+
   return (
     <div className="rounded-md border bg-card">
       <Table>
@@ -74,7 +78,8 @@ const handleDelete = async (id: string) => {
         <TableBody>
           {data.length > 0 ? (
             data.map((client) => (
-              <TableRow key={client.id}>
+              <TableRow key={client.id}
+              onClick={() => handleView(client.id!)} >
                 <TableCell className="font-medium">{client.name}</TableCell>
                 <TableCell>{client.email}</TableCell>
                 <TableCell>{client.phone}</TableCell>
@@ -93,6 +98,12 @@ const handleDelete = async (id: string) => {
                         <Link href={`/clientes/${client.id}/editar`}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/clientes/${client.id}`}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Ver
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 

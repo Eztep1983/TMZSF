@@ -48,7 +48,6 @@ export default function FormularioGarantia({ onClose, onSuccess }: FormularioGar
         descripcionProblema,
         tiempoGarantia,
         condicionesGarantia,
-        estado: 'pendiente'
       }
 
       await addDoc(collection(db, 'ordenes'), nuevaOrden)

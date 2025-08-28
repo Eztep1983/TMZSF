@@ -47,15 +47,6 @@ export default function OrdenesGarantiaPage() {
     orden.dispositivo.numeroSerie.toLowerCase().includes(busqueda.toLowerCase())
   )
 
-  const getEstadoColor = (estado: string) => {
-    switch (estado) {
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800'
-      case 'en_proceso': return 'bg-blue-100 text-blue-800'
-      case 'completada': return 'bg-green-100 text-green-800'
-      case 'cancelada': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
 
   const imprimirOrden = (orden: OrdenGarantia) => {
     window.print()
@@ -138,9 +129,6 @@ export default function OrdenesGarantiaPage() {
                       Problema
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -163,11 +151,6 @@ export default function OrdenesGarantiaPage() {
                         <div className="text-sm text-gray-900 max-w-xs truncate">
                           {orden.descripcionProblema}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(orden.estado)}`}>
-                          {orden.estado.replace('_', ' ')}
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {orden.fechaCreacion?.toLocaleDateString()}

@@ -49,7 +49,6 @@ export default function FormularioDiagnostico({ onClose, onSuccess }: Formulario
         pruebasRealizadas,
         posiblesCausas,
         contadorMaquina,
-        estado: 'pendiente',
         diagnosticoFinal: '',
         recomendaciones: ''
       }

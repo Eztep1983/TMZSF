@@ -1,19 +1,24 @@
 // types/orden.ts
-export interface Cliente {
-  id: string;
-  nombre: string;
-  email: string;
-  telefono: string;
-  direccion?: string;
-  observations?: string;
-  equipo?: string; 
-}
-
 export interface Dispositivo {
+  id: string;
   tipo: string;
   marca: string;
   modelo: string;
   numeroSerie: string;
+  fechaCompra?: Date;
+  observaciones?: string;
+}
+
+export interface Cliente {
+  id: string;
+  name: string; 
+  email: string;
+  phone: string; 
+  address?: string; 
+  observations?: string;
+  dispositivos: Dispositivo[]; 
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface OrdenBase {
@@ -21,7 +26,6 @@ export interface OrdenBase {
   cliente: Cliente;
   dispositivo: Dispositivo;
   fechaCreacion: Date;
-  estado: 'pendiente' | 'en_proceso' | 'completada' | 'cancelada';
 }
 
 export interface OrdenGarantia extends OrdenBase {
@@ -33,18 +37,21 @@ export interface OrdenGarantia extends OrdenBase {
   condicionesGarantia: string;
 }
 
-export interface OrdenMantenimiento extends OrdenBase {
+// types/orden.ts
+export interface OrdenMantenimiento {
+  id: string; // Este será el ID personalizado (OMAN01, etc.)
+  idPersonalizado: string; // También puedes mantenerlo como campo si quieres
   tipo: 'mantenimiento';
+  cliente: Cliente;
+  dispositivo: Dispositivo;
+  fechaCreacion: Date;
+  horaCreacion: string; 
   tipoMantenimiento: 'preventivo' | 'correctivo';
   tareasRealizadas: string[];
-  piezasUsadas?: Array<{
-    pieza: string;
-    cantidad: number;
-    precio?: number;
-  }>;
-  estadoAntes?: string[];
-  estadoDespues?: string[];
-  garantiaTiempo: number; // en meses
+  piezasUsadas?: Array<{pieza: string, cantidad: number}>;
+  estadoAntes: string[];
+  estadoDespues: string[];
+  garantiaTiempo: number;
   garantiaDescripcion: string;
 }
 

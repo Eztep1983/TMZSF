@@ -18,46 +18,160 @@ export default function OrdenesMantenimientoPage() {
   useEffect(() => {
     cargarOrdenes()
   }, [])
+      const cargarOrdenes = async () => {
+        try {
+          const q = query(
+            collection(db, 'ordenes'),
+            where('tipo', '==', 'mantenimiento'),
+            orderBy('fechaCreacion', 'desc')
+          )
+          const querySnapshot = await getDocs(q)
+          const ordenesData = querySnapshot.docs.map(doc => ({
+            id: doc.id, // Ahora el ID será el personalizado (OMAN01, etc.)
+            ...doc.data(),
+            fechaCreacion: doc.data().fechaCreacion?.toDate()
+          })) as OrdenMantenimiento[]
+          setOrdenes(ordenesData)
+        } catch (error) {
+          console.error('Error cargando órdenes:', error)
+        } finally {
+          setLoading(false)
+        }
+      }
 
-  const cargarOrdenes = async () => {
-    try {
-      const q = query(
-        collection(db, 'ordenes'),
-        where('tipo', '==', 'mantenimiento'),
-        orderBy('fechaCreacion', 'desc')
-      )
-      const querySnapshot = await getDocs(q)
-      const ordenesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        fechaCreacion: doc.data().fechaCreacion?.toDate()
-      })) as OrdenMantenimiento[]
-      setOrdenes(ordenesData)
-    } catch (error) {
-      console.error('Error cargando órdenes:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  // Filtro con verificaciones de seguridad
   const ordenesFiltradas = ordenes.filter(orden =>
-    orden.cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    orden.dispositivo.modelo.toLowerCase().includes(busqueda.toLowerCase()) ||
-    orden.dispositivo.numeroSerie.toLowerCase().includes(busqueda.toLowerCase())
+    (orden.cliente?.phone?.toLowerCase() || '').includes(busqueda.toLowerCase()) ||
+    (orden.cliente?.name?.toLowerCase() || '').includes(busqueda.toLowerCase()) ||
+    (orden.dispositivo?.modelo?.toLowerCase() || '').includes(busqueda.toLowerCase()) ||
+    (orden.dispositivo?.numeroSerie?.toLowerCase() || '').includes(busqueda.toLowerCase())
   )
-
-  const getEstadoColor = (estado: string) => {
-    switch (estado) {
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800'
-      case 'en_proceso': return 'bg-blue-100 text-blue-800'
-      case 'completada': return 'bg-green-100 text-green-800'
-      case 'cancelada': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
 
   const getTipoColor = (tipo: string) => {
     return tipo === 'preventivo' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+  }
+
+  const imprimirOrden = (orden: OrdenMantenimiento) => {
+    const contenido = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Orden de Mantenimiento #${orden.id}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .section { margin-bottom: 20px; }
+          .section h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
+          .flex-container { display: flex; justify-content: space-between; }
+          .cliente, .dispositivo { width: 48%; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f5f5f5; }
+          .badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+          .preventivo { background-color: #d1fae5; color: #065f46; }
+          .correctivo { background-color: #ffedd5; color: #9a3412; }
+          @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Orden de Mantenimiento #${orden.id}</h1>
+          <p>Fecha: ${orden.fechaCreacion?.toLocaleDateString()}</p>
+        </div>
+
+        <div class="flex-container">
+          <div class="cliente section">
+            <h2>Información del Cliente</h2>
+            <p><strong>Nombre:</strong> ${orden.cliente?.name || 'N/A'}</p>
+            <p><strong>Teléfono:</strong> ${orden.cliente?.phone || 'N/A'}</p>
+            <p><strong>Email:</strong> ${orden.cliente?.email || 'N/A'}</p>
+            <p><strong>Dirección:</strong> ${orden.cliente?.address || 'N/A'}</p>
+          </div>
+
+          <div class="dispositivo section">
+            <h2>Información del Dispositivo</h2>
+            <p><strong>Tipo:</strong> ${orden.dispositivo?.tipo || 'N/A'}</p>
+            <p><strong>Marca/Modelo:</strong> ${orden.dispositivo?.marca || ''} ${orden.dispositivo?.modelo || ''}</p>
+            <p><strong>Número de Serie:</strong> ${orden.dispositivo?.numeroSerie || 'N/A'}</p>
+            <p><strong>Tipo de Mantenimiento:</strong> 
+              <span class="badge ${orden.tipoMantenimiento === 'preventivo' ? 'preventivo' : 'correctivo'}">
+                ${orden.tipoMantenimiento}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Tareas Realizadas</h2>
+          <ol>
+            ${orden.tareasRealizadas?.map(tarea => `<li>${tarea}</li>`).join('') || '<li>No se registraron tareas</li>'}
+          </ol>
+        </div>
+
+        ${orden.piezasUsadas && orden.piezasUsadas.length > 0 ? `
+        <div class="section">
+          <h2>Piezas Utilizadas</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Pieza</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orden.piezasUsadas.map(pieza => `
+                <tr>
+                  <td>${pieza.pieza}</td>
+                  <td>${pieza.cantidad}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ` : ''}
+
+        <div class="flex-container">
+          <div class="section" style="width: 48%;">
+            <h2>Estado Antes del Mantenimiento</h2>
+            <ul>
+              ${orden.estadoAntes?.map(estado => `<li>${estado}</li>`).join('') || '<li>No se registró estado inicial</li>'}
+            </ul>
+          </div>
+
+          <div class="section" style="width: 48%;">
+            <h2>Estado Después del Mantenimiento</h2>
+            <ul>
+              ${orden.estadoDespues?.map(estado => `<li>${estado}</li>`).join('') || '<li>No se registró estado final</li>'}
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Garantía</h2>
+          <p><strong>Duración:</strong> ${orden.garantiaTiempo || 0} meses</p>
+          <p><strong>Descripción:</strong> ${orden.garantiaDescripcion || 'No se especificó garantía'}</p>
+        </div>
+
+        <div class="no-print" style="margin-top: 30px; text-align: center;">
+          <button onclick="window.print()" style="padding: 10px 20px; background: #065f46; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Imprimir
+          </button>
+          <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+            Cerrar
+          </button>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const ventanaImpression = window.open('', '_blank');
+    if (ventanaImpression) {
+      ventanaImpression.document.write(contenido);
+      ventanaImpression.document.close();
+    }
   }
 
   if (mostrarFormulario) {
@@ -77,29 +191,30 @@ export default function OrdenesMantenimientoPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/ordenes" className="text-green-600 hover:text-green-800">
-                <ArrowLeft className="w-6 h-6" />
-              </Link>
-              <div className="flex items-center space-x-3">
-                <Wrench className="w-8 h-8 text-green-600" />
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Órdenes de Mantenimiento</h1>
-                  <p className="text-gray-600">Mantenimiento preventivo y correctivo de equipos</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <Link href="/ordenes" className="text-green-600 hover:text-green-800 self-start sm:self-auto">
+                  <ArrowLeft className="w-6 h-6" />
+                </Link>
+                <div className="flex items-start sm:items-center gap-3">
+                  <Wrench className="w-8 h-8 text-green-600" />
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Órdenes de Mantenimiento</h1>
+                    <p className="text-gray-600 text-sm sm:text-base">
+                      Mantenimiento preventivo y correctivo de equipos
+                    </p>
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => setMostrarFormulario(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 self-start sm:self-auto"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-sm sm:text-base">Nueva Orden</span>
+              </button>
             </div>
-            <button
-              onClick={() => setMostrarFormulario(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Nueva Orden</span>
-            </button>
           </div>
-        </div>
-
         {/* Estadísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-4">
@@ -134,10 +249,8 @@ export default function OrdenesMantenimientoPage() {
                 <Wrench className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">En Proceso</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {ordenes.filter(o => o.estado === 'en_proceso').length}
-                </p>
+                <p className="text-sm text-gray-600">Total Órdenes de Mantenimiento</p>
+                <p className="text-2xl font-bold text-blue-600">{ordenes.length}</p>
               </div>
             </div>
           </div>
@@ -188,9 +301,6 @@ export default function OrdenesMantenimientoPage() {
                       Tareas
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -202,12 +312,12 @@ export default function OrdenesMantenimientoPage() {
                   {ordenesFiltradas.map((orden) => (
                     <tr key={orden.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{orden.cliente.nombre}</div>
-                        <div className="text-sm text-gray-500">{orden.cliente.telefono}</div>
+                        <div className="text-sm font-medium text-gray-900">{orden.cliente?.name || 'N/A'}</div>
+                        <div className="text-sm text-gray-500">{orden.cliente?.phone || 'Sin teléfono'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{orden.dispositivo.marca} {orden.dispositivo.modelo}</div>
-                        <div className="text-sm text-gray-500">S/N: {orden.dispositivo.numeroSerie}</div>
+                        <div className="text-sm text-gray-900">{orden.dispositivo?.marca || ''} {orden.dispositivo?.modelo || ''}</div>
+                        <div className="text-sm text-gray-500">S/N: {orden.dispositivo?.numeroSerie || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoColor(orden.tipoMantenimiento)}`}>
@@ -216,19 +326,15 @@ export default function OrdenesMantenimientoPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
-                          {orden.tareasRealizadas.length} tarea(s)
+                          {orden.tareasRealizadas?.length || 0} tarea(s)
                         </div>
                         <div className="text-xs text-gray-500">
-                          {orden.tareasRealizadas[0] && `${orden.tareasRealizadas[0].substring(0, 30)}...`}
+                          {orden.tareasRealizadas?.[0] && `${orden.tareasRealizadas[0].substring(0, 30)}...`}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(orden.estado)}`}>
-                          {orden.estado.replace('_', ' ')}
-                        </span>
-                      </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {orden.fechaCreacion?.toLocaleDateString()}
+                        {orden.fechaCreacion?.toLocaleDateString() || 'Fecha no disponible'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
@@ -239,7 +345,7 @@ export default function OrdenesMantenimientoPage() {
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => window.print()}
+                            onClick={() => imprimirOrden(orden)}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             <Printer className="w-4 h-4" />
@@ -271,14 +377,14 @@ export default function OrdenesMantenimientoPage() {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-semibold text-gray-900">Cliente</h4>
-                    <p>{ordenSeleccionada.cliente.nombre}</p>
-                    <p>{ordenSeleccionada.cliente.telefono} | {ordenSeleccionada.cliente.email}</p>
-                    <p>{ordenSeleccionada.cliente.direccion}</p>
+                    <p>{ordenSeleccionada.cliente?.name || 'N/A'}</p>
+                    <p>{ordenSeleccionada.cliente?.phone || 'N/A'} | {ordenSeleccionada.cliente?.email || 'N/A'}</p>
+                    <p>{ordenSeleccionada.cliente?.address || 'N/A'}</p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Dispositivo</h4>
-                    <p>{ordenSeleccionada.dispositivo.marca} {ordenSeleccionada.dispositivo.modelo}</p>
-                    <p>Número de Serie: {ordenSeleccionada.dispositivo.numeroSerie}</p>
+                    <p>{ordenSeleccionada.dispositivo?.marca || ''} {ordenSeleccionada.dispositivo?.modelo || ''}</p>
+                    <p>Número de Serie: {ordenSeleccionada.dispositivo?.numeroSerie || 'N/A'}</p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Tipo de Mantenimiento</h4>
@@ -291,9 +397,9 @@ export default function OrdenesMantenimientoPage() {
                   <div>
                     <h4 className="font-semibold text-gray-900">Tareas Realizadas</h4>
                     <ul className="list-disc list-inside text-sm">
-                      {ordenSeleccionada.tareasRealizadas.map((tarea, index) => (
+                      {ordenSeleccionada.tareasRealizadas?.map((tarea, index) => (
                         <li key={index}>{tarea}</li>
-                      ))}
+                      )) || <li>No se registraron tareas</li>}
                     </ul>
                   </div>
                   {ordenSeleccionada.piezasUsadas && ordenSeleccionada.piezasUsadas.length > 0 && (
@@ -303,7 +409,6 @@ export default function OrdenesMantenimientoPage() {
                         {ordenSeleccionada.piezasUsadas.map((pieza, index) => (
                           <li key={index}>
                             {pieza.cantidad}x {pieza.pieza} 
-                            {pieza.precio && ` - $${pieza.precio}`}
                           </li>
                         ))}
                       </ul>
@@ -311,8 +416,8 @@ export default function OrdenesMantenimientoPage() {
                   )}
                   <div>
                     <h4 className="font-semibold text-gray-900">Garantía</h4>
-                    <p>{ordenSeleccionada.garantiaTiempo} meses</p>
-                    <p className="text-sm">{ordenSeleccionada.garantiaDescripcion}</p>
+                    <p>{ordenSeleccionada.garantiaTiempo || 0} meses</p>
+                    <p className="text-sm">{ordenSeleccionada.garantiaDescripcion || 'No se especificó garantía'}</p>
                   </div>
                 </div>
               </div>
