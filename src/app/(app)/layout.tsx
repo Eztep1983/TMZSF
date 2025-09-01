@@ -20,7 +20,7 @@ import { UserProfile } from '@/components/auth/UserProfile';
 const navigation = [
   { name: 'Órdenes de Servicio', href: '/ordenes', icon: Wrench },
   { name: 'Clientes', href: '/clientes', icon: Users },
-  { name: 'Inventario', href: '/inventario', icon: Package },
+  { name: 'Tecnicos', href: '/tecnicos', icon: Package },
 ];
 
 const secondaryNavigation = [

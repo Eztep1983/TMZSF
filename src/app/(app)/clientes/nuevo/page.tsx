@@ -18,7 +18,7 @@ export default function NuevoClientePage() {
           <Button asChild variant="outline">
             <Link href="/clientes">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al Listado
+               Listado de clientes
             </Link>
           </Button>
         </div>

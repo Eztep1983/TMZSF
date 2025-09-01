@@ -21,10 +21,10 @@ export function ClientesList() {
         const clientesData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           name: doc.data().name || "",
+          cedula: doc.data().cedula || "",
           email: doc.data().email || "",
           phone: doc.data().phone || "",
           address: doc.data().address || "",
-          observations: doc.data().observations || "",
           dispositivos: doc.data().dispositivos || [],
         }));
         

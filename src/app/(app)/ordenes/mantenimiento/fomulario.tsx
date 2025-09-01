@@ -207,7 +207,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           {/* Selección de Cliente */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Seleccionar Cliente</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Selecciona el Cliente</h2>
               <button
                 type="button"
                 onClick={() => router.push('/clientes/nuevo')}

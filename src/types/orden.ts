@@ -11,11 +11,11 @@ export interface Dispositivo {
 
 export interface Cliente {
   id: string;
-  name: string; 
+  name: string;
+  cedula: string; 
   email: string;
   phone: string; 
   address?: string; 
-  observations?: string;
   dispositivos: Dispositivo[]; 
   createdAt?: string;
   updatedAt?: string;
@@ -39,8 +39,8 @@ export interface OrdenGarantia extends OrdenBase {
 
 // types/orden.ts
 export interface OrdenMantenimiento {
-  id: string; // Este será el ID personalizado (OMAN01, etc.)
-  idPersonalizado: string; // También puedes mantenerlo como campo si quieres
+  id: string; 
+  idPersonalizado: string; 
   tipo: 'mantenimiento';
   cliente: Cliente;
   dispositivo: Dispositivo;
