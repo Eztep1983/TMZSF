@@ -1,8 +1,7 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  LayoutDashboard,
   Wrench,
   Users,
   Menu,
@@ -18,9 +17,9 @@ import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/components/auth/UserProfile';
 
 const navigation = [
-  { name: 'Órdenes de Servicio', href: '/ordenes', icon: Wrench },
+  { name: 'Ordenes de Servicio', href: '/ordenes', icon: Package  },
   { name: 'Clientes', href: '/clientes', icon: Users },
-  { name: 'Tecnicos', href: '/tecnicos', icon: Package },
+  { name: 'Tecnicos', href: '/tecnicos', icon: Wrench },
 ];
 
 const secondaryNavigation = [
@@ -30,66 +29,100 @@ const secondaryNavigation = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [pathname, isMobile]);
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setSidebarOpen(false);
+    }
+  }, []);
 
   const NavLinks = ({onClick}: {onClick?: () => void}) => (
     <>
     <nav className="flex-1 space-y-1 px-2 pb-4">
-      {navigation.map((item) => (
-        <Link
-          key={item.name}
-          href={item.href}
-          onClick={onClick}
-          className={cn(
-            pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href
-              ? 'bg-accent text-accent-foreground'
-              : 'text-card-foreground hover:bg-accent/50',
-            'group flex items-center rounded-md px-2 py-2 text-sm font-medium'
-          )}
-        >
-          <item.icon
-            className="mr-3 h-6 w-6 flex-shrink-0"
-            aria-hidden="true"
-          />
-          {item.name}
-        </Link>
-      ))}
+      {navigation.map((item) => {
+        const isActive = pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href;
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            onClick={onClick}
+            className={cn(
+              isActive
+                ? 'bg-primary text-white shadow-md'
+                : 'text-gray-300 hover:bg-accent/30 hover:text-white transition-colors duration-200',
+              'group flex items-center rounded-md px-3 py-3 text-base font-medium'
+            )}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <item.icon
+              className="mr-4 h-6 w-6 flex-shrink-0"
+              aria-hidden="true"
+            />
+            {item.name}
+          </Link>
+        );
+      })}
     </nav>
-    <div>
+    <div className="mt-auto border-t border-gray-700 pt-4">
         <nav className="space-y-1 px-2 pb-4">
-        {secondaryNavigation.map((item) => (
+        {secondaryNavigation.map((item) => {
+          const isActive = pathname.startsWith(item.href);
+          return (
             <Link
             key={item.name}
             href={item.href}
             onClick={onClick}
             className={cn(
-                pathname.startsWith(item.href)
-                ? 'bg-accent text-accent-foreground'
-                : 'text-card-foreground hover:bg-accent/50',
-                'group flex items-center rounded-md px-2 py-2 text-sm font-medium'
+                isActive
+                ? 'bg-primary text-white shadow-md'
+                : 'text-gray-300 hover:bg-accent/70 hover:text-white transition-colors duration-200',
+                'group flex items-center rounded-md px-3 py-3 text-base font-medium'
             )}
+            aria-current={isActive ? 'page' : undefined}
             >
             <item.icon
-                className="mr-3 h-6 w-6 flex-shrink-0"
+                className="mr-4 h-6 w-6 flex-shrink-0"
                 aria-hidden="true"
             />
             {item.name}
             </Link>
-        ))}
+          );
+        })}
         </nav>
     </div>
     </>
   )
 
-
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-gray-900 text-white">
       {/* Static sidebar for desktop */}
       <aside className="hidden md:flex md:flex-shrink-0">
         <div className="flex w-64 flex-col">
-          <div className="flex flex-grow flex-col overflow-y-auto border-r border-border bg-card pt-5">
-            <div className="flex flex-shrink-0 items-center px-4">
-              <Wrench className="h-8 w-auto text-primary" />
-              <span className="ml-2 text-xl font-semibold font-headline">TecniControl</span>
+          <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-800 bg-gray-800 pt-5">
+            <div className="flex flex-shrink-0 items-center px-4 mb-6">
+              <div className="flex items-center">
+                <span className="ml-2 text-xl font-bold text-blue-400">TecniControl</span>
+              </div>
             </div>
             <div className="mt-5 flex flex-1 flex-col justify-between">
               <NavLinks />
@@ -100,20 +133,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile menu button */}
-        <div className="relative z-10 flex h-16 flex-shrink-0 bg-card shadow md:hidden">
+        <div className="sticky top-0 z-20 flex h-16 flex-shrink-0 bg-gray-800 shadow-md md:hidden">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(true)}
-            className="px-4 text-foreground"
+            className="px-4 text-white hover:bg-gray-700 top-0 left-0 h-full rounded-none"
+            aria-label="Abrir menú de navegación"
           >
-            <span className="sr-only">Abrir barra lateral</span>
             <Menu className="h-6 w-6" aria-hidden="true" />
           </Button>
           <div className="flex flex-1 justify-between px-4">
             <div className="flex flex-1 items-center">
-              <Wrench className="h-8 w-auto text-primary" />
-              <span className="ml-2 text-xl font-semibold font-headline">TecniControl</span>
+              <span className="text-xl font-bold text-blue-400">TecniControl</span>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
                 <UserProfile />
@@ -122,44 +154,46 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         
         {/* Header for desktop */}
-        <header className="hidden md:flex md:items-center md:justify-end md:h-16 md:px-6 bg-card border-b">
+        <header className="sticky top-0 z-10 hidden md:flex md:items-center md:justify-end md:h-16 md:px-6 bg-gray-800 border-b border-gray-700 shadow-sm">
             <UserProfile />
         </header>
 
         {/* Mobile sidebar */}
-        {sidebarOpen && (
-          <div className="fixed inset-0 z-40 flex md:hidden">
-            <div
-              className="fixed inset-0 bg-black/30"
-              aria-hidden="true"
-              onClick={() => setSidebarOpen(false)}
-            />
-            <div className="relative flex w-full max-w-xs flex-1 flex-col bg-card pt-5 pb-4">
-              <div className="absolute top-0 right-0 -mr-12 pt-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSidebarOpen(false)}
-                  className="ml-1 flex h-10 w-10 items-center justify-center rounded-full"
-                >
-                  <span className="sr-only">Cerrar barra lateral</span>
-                  <X className="h-6 w-6 text-white" aria-hidden="true" />
-                </Button>
-              </div>
-              <div className="flex flex-shrink-0 items-center px-4">
-                 <Wrench className="h-8 w-auto text-primary" />
-                 <span className="ml-2 text-xl font-semibold font-headline">TecniControl</span>
-              </div>
-              <div className="mt-5 h-0 flex-1 overflow-y-auto justify-between flex flex-col">
-                <NavLinks onClick={() => setSidebarOpen(false)}/>
-              </div>
+        <div className={cn(
+          "fixed inset-0 z-40 flex md:hidden transition-opacity duration-300",
+          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}>
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={handleBackdropClick}
+          />
+          <div className={cn(
+            "relative flex w-full max-w-xs flex-1 flex-col bg-gray-800 pt-5 pb-4 transform transition-transform duration-300 ease-in-out",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}>
+            <div className="absolute top-0 right-2 pt-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(false)}
+                className="ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 hover:bg-black/40"
+                aria-label="Cerrar menú de navegación"
+              >
+                <X className="h-6 w-6 text-white" aria-hidden="true" />
+              </Button>
             </div>
-            <div className="w-14 flex-shrink-0" aria-hidden="true" />
+            <div className="flex flex-shrink-0 items-center px-4 mb-6">
+              <span className="text-xl font-bold text-blue-400">TecniControl</span>
+            </div>
+            <div className="mt-5 h-0 flex-1 overflow-y-auto justify-between flex flex-col">
+              <NavLinks onClick={() => setSidebarOpen(false)}/>
+            </div>
           </div>
-        )}
+        </div>
 
-        <main className="flex-1 overflow-y-auto focus:outline-none">
-          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        <main className="flex-1 overflow-y-auto focus:outline-none p-4 sm:p-6 lg:p-8 bg-gray-900">
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>
