@@ -1,9 +1,11 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/components/auth/AuthProvider"; 
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -34,7 +36,9 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>
-          {children}
+          <ProtectedRoute>
+            {children}
+          </ProtectedRoute>
           <Toaster />
         </AuthProvider>
       </body>

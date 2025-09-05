@@ -1,3 +1,5 @@
+//components/auth/UserProfile.tsx
+
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";

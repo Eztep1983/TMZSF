@@ -15,6 +15,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/components/auth/UserProfile';
+import { AuthProvider } from '@/context/AuthContext';
 
 const navigation = [
   { name: 'Ordenes de Servicio', href: '/ordenes', icon: Package  },
@@ -148,14 +149,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="text-xl font-bold text-blue-400">TecniControl</span>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
+              <AuthProvider>
                 <UserProfile />
+              </AuthProvider>
             </div>
           </div>
         </div>
         
         {/* Header for desktop */}
         <header className="sticky top-0 z-10 hidden md:flex md:items-center md:justify-end md:h-16 md:px-6 bg-gray-800 border-b border-gray-700 shadow-sm">
+      <AuthProvider>
             <UserProfile />
+      </AuthProvider>
         </header>
 
         {/* Mobile sidebar */}

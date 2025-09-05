@@ -1,3 +1,4 @@
+//app/login/page.tsx
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Wrench } from "lucide-react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { AuthProvider } from "@/context/AuthContext";
 
 function GoogleIcon() {
   return (
@@ -18,7 +20,8 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+// Create a separate component that uses the hook
+function LoginContent() {
   const { user, signInWithGoogle, loading } = useAuth();
   const router = useRouter();
 
@@ -62,5 +65,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AuthProvider>
+      <LoginContent />
+    </AuthProvider>
   );
 }

@@ -1,4 +1,3 @@
-// app/ordenes/page.tsx
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -16,15 +15,16 @@ import {
   CheckCircle,
   Loader2
 } from 'lucide-react'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { useAuth } from '@/components/auth/AuthProvider'
+// USAR LOS HOOKS MULTI-USUARIO
+import { useOrdenesUsuario, useEstadisticasUsuario } from '@/hooks/useMultiUser'
 
 export default function OrdenesPage() {
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    total: 0
+  const { user, loading: authLoading } = useAuth()
+  // USAR LOS HOOKS MULTI-USUARIO PARA OBTENER DATOS FILTRADOS POR USUARIO
+  const { ordenes, loading: ordenesLoading } = useOrdenesUsuario()
+  const { estadisticas, loading: statsLoading } = useEstadisticasUsuario()
 
-  })
   const [ordenesCount, setOrdenesCount] = useState({
     garantia: 0,
     mantenimiento: 0,
@@ -33,49 +33,32 @@ export default function OrdenesPage() {
   })
 
   useEffect(() => {
-    const fetchOrdenesData = async () => {
-      try {
-        setLoading(true)
-        
-        // Obtener todas las órdenes
-        const ordenesRef = collection(db, 'ordenes')
-        const ordenesSnapshot = await getDocs(ordenesRef)
-        
-        // Contar órdenes por tipo
-        const counts = {
-          garantia: 0,
-          mantenimiento: 0,
-          diagnostico: 0,
-          entrega: 0
-        }
-
-        
-        ordenesSnapshot.forEach((doc) => {
-          const data = doc.data()
-          const tipo = data.tipo
-          
-          // Contar por tipo
-          if (counts.hasOwnProperty(tipo)) {
-            counts[tipo as keyof typeof counts]++
-          }
-          
-        })
-        
-        setOrdenesCount(counts)
-        setStats({
-          total: ordenesSnapshot.size,
-
-        })
-        
-      } catch (error) {
-        console.error('Error fetching orders data:', error)
-      } finally {
-        setLoading(false)
+    // CONTAR ÓRDENES POR TIPO USANDO LOS DATOS YA FILTRADOS POR USUARIO
+    if (ordenes.length > 0) {
+      const counts = {
+        garantia: 0,
+        mantenimiento: 0,
+        diagnostico: 0,
+        entrega: 0
       }
+      
+      ordenes.forEach((orden) => {
+        const tipo = orden.tipo
+        if (counts.hasOwnProperty(tipo)) {
+          counts[tipo as keyof typeof counts]++
+        }
+      })
+      
+      setOrdenesCount(counts)
+    } else {
+      setOrdenesCount({
+        garantia: 0,
+        mantenimiento: 0,
+        diagnostico: 0,
+        entrega: 0
+      })
     }
-
-    fetchOrdenesData()
-  }, [])
+  }, [ordenes])
 
   const tiposOrden = [
     {
@@ -114,7 +97,7 @@ export default function OrdenesPage() {
     {
       tipo: 'entrega',
       titulo: 'Orden de Entrega',
-      descripcion: 'Entrega de equipos reparados al cliente',
+      descripción: 'Entrega de equipos reparados al cliente',
       icono: Truck,
       color: 'bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/30',
       colorIcon: 'text-purple-400',
@@ -124,12 +107,26 @@ export default function OrdenesPage() {
     },
   ]
 
-  if (loading) {
+  // Mostrar loading si está cargando auth o datos
+  if (authLoading || (ordenesLoading && user?.uid)) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Cargando datos de órdenes...</p>
+          <p className="text-gray-400">
+            {authLoading ? 'Verificando autenticación...' : 'Cargando datos de órdenes...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Mostrar mensaje si no hay usuario autenticado
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-400">Debes iniciar sesión para acceder a esta página.</p>
         </div>
       </div>
     )
@@ -145,7 +142,7 @@ export default function OrdenesPage() {
               Gestión de Órdenes de Servicio
             </h1>
             <p className="text-gray-400 text-sm sm:text-base">
-              Selecciona el tipo de orden que deseas gestionar
+              Selecciona el tipo de orden que deseas generar o gestionar.
             </p>
           </div>
           
@@ -203,7 +200,9 @@ export default function OrdenesPage() {
                   <span className="text-sm text-gray-400">Total</span>
                 </div>
               </div>
-              <p className="text-2xl font-bold text-white mt-2 text-center">{stats.total}</p>
+              <p className="text-2xl font-bold text-white mt-2 text-center">
+                {statsLoading ? '...' : estadisticas.totalOrdenes}
+              </p>
               <p className="text-xs text-gray-500 text-center">Órdenes totales</p>
             </div>
           </div>
@@ -222,4 +221,4 @@ export default function OrdenesPage() {
       </div>
     </div>
   )
-}
+};

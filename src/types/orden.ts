@@ -1,4 +1,5 @@
 // types/orden.ts
+
 export interface Dispositivo {
   id: string;
   tipo: string;
@@ -11,18 +12,20 @@ export interface Dispositivo {
 
 export interface Cliente {
   id: string;
+  userId: string; 
   name: string;
-  cedula: string; 
+  cedula: string;
   email: string;
-  phone: string; 
-  address?: string; 
-  dispositivos: Dispositivo[]; 
+  phone: string;
+  address?: string;
+  dispositivos: Dispositivo[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface OrdenBase {
   id: string;
+  userId: string; 
   cliente: Cliente;
   dispositivo: Dispositivo;
   fechaCreacion: Date;
@@ -33,28 +36,30 @@ export interface OrdenGarantia extends OrdenBase {
   fechaCompra: Date;
   descripcionProblema: string;
   evidencia?: string[];
-  tiempoGarantia: number; // en meses
+  tiempoGarantia: number; 
   condicionesGarantia: string;
 }
 
 // types/orden.ts
 export interface OrdenMantenimiento {
-  id: string; 
-  idPersonalizado: string; 
+  id?: string;
+  idPersonalizado: string; // ID consecutivo personalizado
   tipo: 'mantenimiento';
+  userId: string;
   cliente: Cliente;
   dispositivo: Dispositivo;
-  fechaCreacion: Date;
-  horaCreacion: string; 
+  fechaCreacion: Date | any;
+  horaCreacion: string;
   tipoMantenimiento: 'preventivo' | 'correctivo';
   tareasRealizadas: string[];
-  piezasUsadas?: Array<{pieza: string, cantidad: number}>;
+  piezasUsadas: Array<{pieza: string, cantidad: number}>;
   estadoAntes: string[];
   estadoDespues: string[];
   garantiaTiempo: number;
   garantiaDescripcion: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
-
 export interface OrdenDiagnostico extends OrdenBase {
   tipo: 'diagnostico';
   observacionesIniciales: string;
@@ -77,6 +82,26 @@ export interface OrdenEntrega extends OrdenBase {
   documentosEntregados?: string;
   contadorFinal?: number;
   garantiaReparacion?: number;
+}
+
+export interface Negocio {
+  id: string;
+  userId: string; 
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  email: string;
+  nit: string;
+  logoUrl?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Contador {
+  userId: string;
+  siguiente: number;
+  ultimaOrden: string;
+  fechaActualizacion: Date;
 }
 
 export type Orden = OrdenGarantia | OrdenMantenimiento | OrdenDiagnostico | OrdenEntrega;

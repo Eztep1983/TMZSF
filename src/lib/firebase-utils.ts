@@ -1,4 +1,4 @@
-// lib/firebase-utils.ts - Versión mejorada
+// lib/firebase-utils.ts 
 import { doc, getDoc, setDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
