@@ -40,7 +40,6 @@ export interface OrdenGarantia extends OrdenBase {
   condicionesGarantia: string;
 }
 
-// types/orden.ts
 export interface OrdenMantenimiento {
   id?: string;
   idPersonalizado: string; // ID consecutivo personalizado

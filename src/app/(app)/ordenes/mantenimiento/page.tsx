@@ -1,3 +1,4 @@
+//mantenimiento/page.tsx
 'use client'
 import { useState, useMemo, useCallback } from 'react'
 import { OrdenMantenimiento } from '@/types/orden'
@@ -5,8 +6,10 @@ import { Plus, Search, Eye, Printer, ArrowLeft, Wrench, X, Filter, ChevronDown, 
 import Link from 'next/link'
 import FormularioMantenimiento from '@/app/(app)/ordenes/mantenimiento/fomulario'
 import { useAuth } from '@/components/auth/AuthProvider'
-// USAR EL HOOK MULTI-USUARIO
 import { useOrdenesUsuario } from '@/hooks/useMultiUser'
+import { Negocio } from '@/types/orden'
+import { useNegocio } from '@/hooks/useNegocio'
+import { NegocioHeader } from '@/components/headersNegocio'
 
 // Componente para el modal de visualización
 const ModalOrden = ({ orden, onClose, onPrint }: { orden: OrdenMantenimiento, onClose: () => void, onPrint: (orden: OrdenMantenimiento) => void }) => {
@@ -183,9 +186,8 @@ const formatFecha = (fecha: any) => {
 // Componente principal
 export default function OrdenesMantenimientoPage() {
   const { user, loading: authLoading } = useAuth()
-  // USAR EL HOOK MULTI-USUARIO PARA OBTENER ÓRDENES FILTRADAS POR USUARIO
   const { ordenes: todasLasOrdenes, loading, error, refrescarOrdenes } = useOrdenesUsuario()
-  
+  const { negocio, loading: loadingNegocio } = useNegocio()
   const [busqueda, setBusqueda] = useState('')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [ordenSeleccionada, setOrdenSeleccionada] = useState<OrdenMantenimiento | null>(null)
@@ -194,7 +196,6 @@ export default function OrdenesMantenimientoPage() {
   const [paginaActual, setPaginaActual] = useState(1)
   const elementosPorPagina = 10
 
-  // FILTRAR SOLO LAS ÓRDENES DE MANTENIMIENTO DE LAS ÓRDENES DEL USUARIO
   const ordenes = useMemo(() => {
     return todasLasOrdenes.filter(orden => orden.tipo === 'mantenimiento') as OrdenMantenimiento[]
   }, [todasLasOrdenes])
@@ -235,129 +236,257 @@ export default function OrdenesMantenimientoPage() {
       : 'bg-orange-500/20 text-orange-400 border-orange-500/30';
   };
 
-  const imprimirOrden = (orden: OrdenMantenimiento) => {
-    const contenido = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Orden de Mantenimiento #${orden.idPersonalizado}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 40px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .section { margin-bottom: 20px; }
-          .section h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
-          .flex-container { display: flex; justify-content: space-between; }
-          .cliente, .dispositivo { width: 48%; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f5f5f5; }
-          .badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-          .preventivo { background-color: #d1fae5; color: #065f46; }
-          .correctivo { background-color: #ffedd5; color: #9a3412; }
-          @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Orden de Mantenimiento #${orden.idPersonalizado}</h1>
-          <p>Fecha: ${formatFecha(orden.fechaCreacion)} : 'Fecha no disponible'}</p>
+
+const imprimirOrden = (orden: OrdenMantenimiento) => {
+  const contenido = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Orden de Mantenimiento #${orden.idPersonalizado}</title>
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 40px; 
+          background-color: #fff;
+          color: #000;
+        }
+        .header { 
+          text-align: center; 
+          margin-bottom: 30px; 
+          border-bottom: 2px solid #333;
+          padding-bottom: 20px;
+        }
+        .negocio-info {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        .negocio-logo {
+          max-width: 100px;
+          max-height: 100px;
+          object-fit: contain;
+        }
+        .negocio-details {
+          text-align: center;
+        }
+        .negocio-details h1 {
+          margin: 0;
+          font-size: 24px;
+          color: #000;
+        }
+        .negocio-details p {
+          margin: 5px 0;
+          font-size: 14px;
+          color: #666;
+        }
+        .orden-info {
+          margin-top: 15px;
+        }
+        .orden-info h2 {
+          margin: 0;
+          font-size: 20px;
+          color: #000;
+        }
+        .orden-info p {
+          margin: 5px 0;
+          color: #666;
+        }
+        .section { 
+          margin-bottom: 20px; 
+          page-break-inside: avoid;
+        }
+        .section h2 { 
+          border-bottom: 1px solid #333; 
+          padding-bottom: 5px; 
+          margin-bottom: 10px;
+          font-size: 18px;
+          color: #000;
+        }
+        .flex-container { 
+          display: flex; 
+          justify-content: space-between; 
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        .cliente, .dispositivo { 
+          width: 48%; 
+          min-width: 300px;
+          flex: 1;
+        }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 10px; 
+        }
+        th, td { 
+          border: 1px solid #ddd; 
+          padding: 8px; 
+          text-align: left; 
+        }
+        th { 
+          background-color: #f5f5f5; 
+        }
+        .badge { 
+          padding: 3px 8px; 
+          border-radius: 12px; 
+          font-size: 12px; 
+          font-weight: bold; 
+        }
+        .preventivo { 
+          background-color: #d1fae5; 
+          color: #065f46; 
+        }
+        .correctivo { 
+          background-color: #ffedd5; 
+          color: #9a3412; 
+        }
+        .no-print {
+          display: block; /* visible normalmente */
+          text-align: center;
+          margin-top: 30px;
+        }
+        @media print {
+          .no-print { display: none; } /* ocultar en impresión */
+        }
+      </style>
+    </head>
+    <body>
+      <!-- Encabezado con información del negocio -->
+      <div class="header">
+        <div class="negocio-info">
+          ${negocio?.logoUrl ? `
+            <img src="${negocio.logoUrl}" alt="${negocio.nombre}" class="negocio-logo">
+          ` : ''}
+          <div class="negocio-details">
+            <h1>${negocio?.nombre || 'Nombre del Negocio'}</h1>
+            ${negocio?.direccion ? `<p>${negocio.direccion}</p>` : ''}
+            ${negocio?.telefono ? `<p>Teléfono: ${negocio.telefono}</p>` : ''}
+            ${negocio?.email ? `<p>Email: ${negocio.email}</p>` : ''}
+            ${negocio?.nit ? `<p>NIT: ${negocio.nit}</p>` : ''}
+          </div>
+        </div>
+        
+        <div class="orden-info">
+          <h2>Orden de Mantenimiento #${orden.idPersonalizado}</h2>
+          <p>Fecha: ${formatFecha(orden.fechaCreacion)} ${orden.horaCreacion || ''}</p>
+        </div>
+      </div>
+
+      <div class="flex-container">
+        <div class="cliente section">
+          <h2>Información del Cliente</h2>
+          <p><strong>Nombre:</strong> ${orden.cliente?.name || 'N/A'}</p>
+          <p><strong>Teléfono:</strong> ${orden.cliente?.phone || 'N/A'}</p>
+          <p><strong>Cédula:</strong> ${orden.cliente?.cedula || 'N/A'}</p>
+          <p><strong>Email:</strong> ${orden.cliente?.email || 'N/A'}</p>
+          <p><strong>Dirección:</strong> ${orden.cliente?.address || 'N/A'}</p>
         </div>
 
-        <div class="flex-container">
-          <div class="cliente section">
-            <h2>Información del Cliente</h2>
-            <p><strong>Nombre:</strong> ${orden.cliente?.name || 'N/A'}</p>
-            <p><strong>Teléfono:</strong> ${orden.cliente?.phone || 'N/A'}</p>
-            <p><strong>Cedula:</strong> ${orden.cliente?.cedula || 'N/A'}</p>
-            <p><strong>Email:</strong> ${orden.cliente?.email || 'N/A'}</p>
-            <p><strong>Dirección:</strong> ${orden.cliente?.address || 'N/A'}</p>
-          </div>
-
-          <div class="dispositivo section">
-            <h2>Información del Dispositivo</h2>
-            <p><strong>Tipo:</strong> ${orden.dispositivo?.tipo || 'N/A'}</p>
-            <p><strong>Marca/Modelo:</strong> ${orden.dispositivo?.marca || ''} ${orden.dispositivo?.modelo || ''}</p>
-            <p><strong>Número de Serie:</strong> ${orden.dispositivo?.numeroSerie || 'N/A'}</p>
-            <p><strong>Tipo de Mantenimiento:</strong> 
-              <span class="badge ${orden.tipoMantenimiento === 'preventivo' ? 'preventivo' : 'correctivo'}">
-                ${orden.tipoMantenimiento}
-              </span>
-            </p>
-          </div>
+        <div class="dispositivo section">
+          <h2>Información del Dispositivo</h2>
+          <p><strong>Tipo:</strong> ${orden.dispositivo?.tipo || 'N/A'}</p>
+          <p><strong>Marca/Modelo:</strong> ${orden.dispositivo?.marca || ''} ${orden.dispositivo?.modelo || ''}</p>
+          <p><strong>Número de Serie:</strong> ${orden.dispositivo?.numeroSerie || 'N/A'}</p>
+          <p><strong>Tipo de Mantenimiento:</strong> 
+            <span class="badge ${orden.tipoMantenimiento === 'preventivo' ? 'preventivo' : 'correctivo'}">
+              ${orden.tipoMantenimiento}
+            </span>
+          </p>
         </div>
+      </div>
 
-        <div class="section">
-          <h2>Tareas Realizadas</h2>
+      <div class="section">
+        <h2>Tareas Realizadas</h2>
+        ${orden.tareasRealizadas?.length > 0 ? `
           <ol>
-            ${orden.tareasRealizadas?.map(tarea => `<li>${tarea}</li>`).join('') || '<li>No se registraron tareas</li>'}
+            ${orden.tareasRealizadas.map(tarea => `<li>${tarea}</li>`).join('')}
           </ol>
-        </div>
+        ` : '<p>No se registraron tareas</p>'}
+      </div>
 
-        ${orden.piezasUsadas && orden.piezasUsadas.length > 0 ? `
-        <div class="section">
-          <h2>Piezas Utilizadas</h2>
-          <table>
-            <thead>
+      ${orden.piezasUsadas && orden.piezasUsadas.length > 0 ? `
+      <div class="section">
+        <h2>Piezas Utilizadas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Pieza</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orden.piezasUsadas.map(pieza => `
               <tr>
-                <th>Pieza</th>
-                <th>Cantidad</th>
+                <td>${pieza.pieza}</td>
+                <td>${pieza.cantidad}</td>
               </tr>
-            </thead>
-            <tbody>
-              ${orden.piezasUsadas.map(pieza => `
-                <tr>
-                  <td>${pieza.pieza}</td>
-                  <td>${pieza.cantidad}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        ` : ''}
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      ` : ''}
 
-        <div class="flex-container">
-          <div class="section" style="width: 48%;">
-            <h2>Estado Antes del Mantenimiento</h2>
+      <div class="flex-container">
+        <div class="section">
+          <h2>Estado Antes del Mantenimiento</h2>
+          ${orden.estadoAntes?.length > 0 ? `
             <ul>
-              ${orden.estadoAntes?.map(estado => `<li>${estado}</li>`).join('') || '<li>No se registró estado inicial</li>'}
+              ${orden.estadoAntes.map(estado => `<li>${estado}</li>`).join('')}
             </ul>
-          </div>
-
-          <div class="section" style="width: 48%;">
-            <h2>Estado Después del Mantenimiento</h2>
-            <ul>
-              ${orden.estadoDespues?.map(estado => `<li>${estado}</li>`).join('') || '<li>No se registró estado final</li>'}
-            </ul>
-          </div>
+          ` : '<p>No se registró estado inicial</p>'}
         </div>
 
         <div class="section">
-          <h2>Garantía</h2>
-          <p><strong>Duración:</strong> ${orden.garantiaTiempo || 0} meses</p>
-          <p><strong>Descripcion:</strong> ${orden.garantiaDescripcion || 'No se especificó garantía'}</p>
+          <h2>Estado Después del Mantenimiento</h2>
+          ${orden.estadoDespues?.length > 0 ? `
+            <ul>
+              ${orden.estadoDespues.map(estado => `<li>${estado}</li>`).join('')}
+            </ul>
+          ` : '<p>No se registró estado final</p>'}
         </div>
+      </div>
 
-        <div class="no-print" style="margin-top: 30px; text-align: center;">
-          <button onclick="window.print()" style="padding: 10px 20px; background: #065f46; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Imprimir
-          </button>
-          <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-            Cerrar
-          </button>
-        </div>
-      </body>
-      </html>
-    `;
+      <div class="section">
+        <h2>Garantía</h2>
+        <p><strong>Duración:</strong> ${orden.garantiaTiempo || 0} meses</p>
+        <p><strong>Descripción:</strong> ${orden.garantiaDescripcion || 'No se especificó garantía'}</p>
+      </div>
 
-    const ventanaImpression = window.open('', '_blank');
-    if (ventanaImpression) {
-      ventanaImpression.document.write(contenido);
-      ventanaImpression.document.close();
-    }
+      <div class="no-print">
+        <button onclick="window.print()" 
+          style="padding: 10px 20px; background: #065f46; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          Imprimir
+        </button>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Crear un iframe oculto
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  // Escribir el contenido en el iframe
+  const doc = iframe.contentWindow!.document;
+  doc.open();
+  doc.write(contenido);
+  doc.close();
+
+  // Esperar un poco y lanzar impresión
+  iframe.onload = () => {
+    iframe.contentWindow!.focus();
+    iframe.contentWindow!.print();
   };
+};
 
   if (mostrarFormulario) {
     return (
@@ -365,7 +494,7 @@ export default function OrdenesMantenimientoPage() {
         onClose={() => setMostrarFormulario(false)}
         onSuccess={() => {
           setMostrarFormulario(false);
-          refrescarOrdenes(); // REFRESCAR USANDO EL HOOK
+          refrescarOrdenes(); 
         }}
       />
     );
@@ -427,6 +556,11 @@ export default function OrdenesMantenimientoPage() {
     <div className="min-h-screen bg-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
+        <NegocioHeader 
+          negocio={negocio}
+          titulo="Órdenes de Mantenimiento"
+          subtitulo="Mantenimiento preventivo y correctivo de equipos"
+        />
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -452,7 +586,7 @@ export default function OrdenesMantenimientoPage() {
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 self-start sm:self-auto transition-colors shadow-md hover:shadow-lg"
             >
               <Plus className="w-5 h-5" />
-              <span className="text-sm sm:text-base">Nueva Orden</span>
+              <span className="w-full text-sm sm:text-base">Nueva Orden</span>
             </button>
           </div>
         </div>
