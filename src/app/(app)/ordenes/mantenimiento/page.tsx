@@ -7,7 +7,6 @@ import Link from 'next/link'
 import FormularioMantenimiento from '@/app/(app)/ordenes/mantenimiento/fomulario'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useOrdenesUsuario } from '@/hooks/useMultiUser'
-import { Negocio } from '@/types/orden'
 import { useNegocio } from '@/hooks/useNegocio'
 import { NegocioHeader } from '@/components/headersNegocio'
 

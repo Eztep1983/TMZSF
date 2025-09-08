@@ -1,6 +1,7 @@
+// src/app/(app)/layout.tsx
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Wrench,
   Users,
@@ -8,109 +9,132 @@ import {
   X,
   Package,
   Settings,
-} from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+  Loader2
+} from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { UserProfile } from '@/components/auth/UserProfile';
-import { AuthProvider } from '@/context/AuthContext';
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { UserProfile } from '@/components/auth/UserProfile'
+import { useAuth } from '@/components/auth/AuthProvider'
 
 const navigation = [
   { name: 'Ordenes de Servicio', href: '/ordenes', icon: Package  },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Tecnicos', href: '/tecnicos', icon: Wrench },
-];
+]
 
 const secondaryNavigation = [
-    { name: 'Configuración', href: '/configuracion', icon: Settings },
+  { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  const { user, loading } = useAuth()
+
+  // ✅ ELIMINADO: No hay redirección aquí, ProtectedRoute se encarga
+  // El layout solo se preocupa de renderizar si hay usuario
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+      setIsMobile(window.innerWidth < 768)
+    }
     
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
     
     return () => {
-      window.removeEventListener('resize', checkIsMobile);
-    };
-  }, []);
+      window.removeEventListener('resize', checkIsMobile)
+    }
+  }, [])
 
   useEffect(() => {
     if (isMobile) {
-      setSidebarOpen(false);
+      setSidebarOpen(false)
     }
-  }, [pathname, isMobile]);
+  }, [pathname, isMobile])
 
   const handleBackdropClick = useCallback((e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      setSidebarOpen(false);
+      setSidebarOpen(false)
     }
-  }, []);
+  }, [])
+
+  // Mostrar loading mientras se verifica autenticación
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-400">Cargando aplicación...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Si no hay usuario, no renderizar nada (ProtectedRoute manejará la redirección)
+  if (!user) {
+    return null
+  }
 
   const NavLinks = ({onClick}: {onClick?: () => void}) => (
     <>
-    <nav className="flex-1 space-y-1 px-2 pb-4">
-      {navigation.map((item) => {
-        const isActive = pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href;
-        return (
-          <Link
-            key={item.name}
-            href={item.href}
-            onClick={onClick}
-            className={cn(
-              isActive
-                ? 'bg-primary text-white shadow-md'
-                : 'text-gray-300 hover:bg-accent/30 hover:text-white transition-colors duration-200',
-              'group flex items-center rounded-md px-3 py-3 text-base font-medium'
-            )}
-            aria-current={isActive ? 'page' : undefined}
-          >
-            <item.icon
-              className="mr-4 h-6 w-6 flex-shrink-0"
-              aria-hidden="true"
-            />
-            {item.name}
-          </Link>
-        );
-      })}
-    </nav>
-    <div className="mt-auto border-t border-gray-700 pt-4">
-        <nav className="space-y-1 px-2 pb-4">
-        {secondaryNavigation.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+      <nav className="flex-1 space-y-1 px-2 pb-4">
+        {navigation.map((item) => {
+          const isActive = pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href
           return (
             <Link
-            key={item.name}
-            href={item.href}
-            onClick={onClick}
-            className={cn(
+              key={item.name}
+              href={item.href}
+              onClick={onClick}
+              className={cn(
                 isActive
-                ? 'bg-primary text-white shadow-md'
-                : 'text-gray-300 hover:bg-accent/70 hover:text-white transition-colors duration-200',
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-gray-300 hover:bg-accent/30 hover:text-white transition-colors duration-200',
                 'group flex items-center rounded-md px-3 py-3 text-base font-medium'
-            )}
-            aria-current={isActive ? 'page' : undefined}
+              )}
+              aria-current={isActive ? 'page' : undefined}
             >
-            <item.icon
+              <item.icon
                 className="mr-4 h-6 w-6 flex-shrink-0"
                 aria-hidden="true"
-            />
-            {item.name}
+              />
+              {item.name}
             </Link>
-          );
+          )
         })}
+      </nav>
+      <div className="mt-auto border-t border-gray-700 pt-4">
+        <nav className="space-y-1 px-2 pb-4">
+          {secondaryNavigation.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={onClick}
+                className={cn(
+                  isActive
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-gray-300 hover:bg-accent/70 hover:text-white transition-colors duration-200',
+                  'group flex items-center rounded-md px-3 py-3 text-base font-medium'
+                )}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <item.icon
+                  className="mr-4 h-6 w-6 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                {item.name}
+              </Link>
+            )
+          })}
         </nav>
-    </div>
+      </div>
     </>
   )
 
@@ -149,18 +173,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="text-xl font-bold text-blue-400">TecniControl</span>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
-              <AuthProvider>
-                <UserProfile />
-              </AuthProvider>
+              <UserProfile />
             </div>
           </div>
         </div>
         
         {/* Header for desktop */}
         <header className="sticky top-0 z-10 hidden md:flex md:items-center md:justify-end md:h-16 md:px-6 bg-gray-800 border-b border-gray-700 shadow-sm">
-      <AuthProvider>
-            <UserProfile />
-      </AuthProvider>
+          <UserProfile />
         </header>
 
         {/* Mobile sidebar */}
@@ -202,5 +222,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
     </div>
-  );
+  )
 }

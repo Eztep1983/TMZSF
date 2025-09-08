@@ -2,7 +2,6 @@
 
 "use client";
 
-import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export function UserProfile() {
   const { user, logout } = useAuth();

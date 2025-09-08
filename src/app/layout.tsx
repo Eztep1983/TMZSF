@@ -5,7 +5,8 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider"; 
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
-import ProtectedRoute from "@/components/ProtectedRoute";
+// import ProtectedRoute from "@/components/ProtectedRoute";
+import { AuthGuard } from "@/components/AuthGuard";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -36,9 +37,9 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>
-          <ProtectedRoute>
+          <AuthGuard>
             {children}
-          </ProtectedRoute>
+          </AuthGuard>
           <Toaster />
         </AuthProvider>
       </body>

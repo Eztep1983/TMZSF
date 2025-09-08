@@ -145,7 +145,7 @@ const OrderCard = ({ order }: { order: Orden }) => {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              Orden #{order.id.slice(-6).toUpperCase()}
+              Orden #{order.id ? order.id.slice(-6).toUpperCase() : 'N/A'}
               <OrderTypeBadge type={order.tipo} />
             </CardTitle>
             <CardDescription>
